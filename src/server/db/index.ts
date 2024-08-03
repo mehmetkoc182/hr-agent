@@ -1,5 +1,6 @@
 import { createClient, type Client } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
+import { conversations, messages } from './schema';
 
 import { env } from "~/env";
 import * as schema from "./schema";
@@ -12,8 +13,11 @@ const globalForDb = globalThis as unknown as {
   client: Client | undefined;
 };
 
-export const client =
-  globalForDb.client ?? createClient({ url: env.DATABASE_URL });
+export const client = globalForDb.client ?? createClient({ url: env.DATABASE_URL });
+
 if (env.NODE_ENV !== "production") globalForDb.client = client;
 
 export const db = drizzle(client, { schema });
+
+// Ensure the database is set up (typically done externally or via a migration system)
+// You can use SQL commands to set up tables if needed, but this is not typically managed directly in code like this.
