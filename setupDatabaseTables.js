@@ -1,7 +1,8 @@
+// This file is used to create the SQLite database and tables.
+
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
-// Replace with your actual database file path or connection string
 const dbPath = 'db.sqlite';
 
 (async () => {

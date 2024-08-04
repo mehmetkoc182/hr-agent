@@ -43,3 +43,16 @@
     color: #2e026d;
   }
   
+  @keyframes fade {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  .fade {
+    display: inline-block;
+    animation: fade 2s infinite;
+  }

@@ -1,5 +1,5 @@
-////
-// Import necessary modules
+// Description: API route to fetch conversation history for a given conversationId.
+
 import { eq } from 'drizzle-orm';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { db } from '~/server/db';

@@ -1,7 +1,7 @@
-// adsfadsfdas
+// This is the main page of the application. It contains the chat interface and logic for sending and receiving messages.
 
-import React, { useState, useEffect } from 'react';
-import { parseCookies, setCookie } from 'nookies';
+import React, { useState, useEffect, useRef } from 'react';
+import { parseCookies, destroyCookie } from 'nookies';
 
 interface Message {
   type: 'user' | 'ai';
@@ -11,6 +11,8 @@ interface Message {
 const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const lastMessageRef = useRef<HTMLDivElement>(null); 
   
   useEffect(() => {
     const cookies = parseCookies();
@@ -36,6 +38,11 @@ const ChatPage: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const handleSend = async () => {
     if (input.trim() === '') return;
@@ -43,6 +50,7 @@ const ChatPage: React.FC = () => {
     // Add user message to chat
     setMessages((prevMessages) => [...prevMessages, { type: 'user', text: input }]);
     setInput('');
+    setIsLoading(true);  // Show loader while waiting for AI response
 
     try {
       // Send the user's message to the backend
@@ -59,16 +67,18 @@ const ChatPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Error sending message:', error);
+    } finally {
+      setIsLoading(false);  // Hide loader
     }
   };
 
-  // Save messages to cookies whenever they change
-  useEffect(() => {
-    setCookie(null, 'messages', JSON.stringify(messages), {
-      maxAge: 30 * 24 * 60 * 60, // 30 days
-      path: '/',
-    });
-  }, [messages]);
+  const handleStartNewConversation = () => {
+    // Clear cookies
+    destroyCookie(null, 'conversationId');
+    destroyCookie(null, 'messages');
+    // Reset messages
+    setMessages([]);
+  };
   
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -80,8 +90,8 @@ const ChatPage: React.FC = () => {
                  'bg-gray-300'
               }`}
             >
-              <p>Talk to me.</p>
               <p>I'm your AI job-seeking assistant.</p>
+              <p>Talk to me.</p>
             </div>
           {messages.map((msg, index) => (
             <div
@@ -89,26 +99,40 @@ const ChatPage: React.FC = () => {
               className={`p-4 rounded-lg ${
                 msg.type === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-gray-300'
               }`}
+              ref={index === messages.length - 1 ? lastMessageRef : null}  // Add ref to the last message
             >
               {msg.text}
             </div>
           ))}
+          {isLoading && (
+            <div className="p-4 fade rounded-lg text-left">
+              <span role="img">🤔</span>
+            </div>
+          )}
         </div>
       </div>
       <div className="p-4 bg-white border-t border-gray-200">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
-          className="w-full p-2 border rounded-md"
-          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-        />
+        <div className="flex items-center">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a message..."
+            className="w-full p-2 border rounded-md"
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+          />
+          <button
+            onClick={handleSend}
+            className="ml-2 p-2 bg-blue-500 text-white rounded-md"
+          >
+            Send
+          </button>
+        </div>
         <button
-          onClick={handleSend}
-          className="mt-2 w-full p-2 bg-blue-500 text-white rounded-md"
+          onClick={handleStartNewConversation}
+          className="mt-2 w-full p-2 bg-red-500 text-white rounded-md"
         >
-          Send
+          Start New Conversation
         </button>
       </div>
     </div>
