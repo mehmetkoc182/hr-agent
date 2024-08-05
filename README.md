@@ -7,7 +7,9 @@ A simple job recruiter agent that finds suitable jobs for job seekers.
 Install dependencies
 `npm install`
 
-Add your OPENAI_API_KEY key in the `.env` file, check `.env.example`
+Create a `.env` file (check `.env.example`) and add your environment variables:
+- Make sure to have your OPENAI_API_KEY key
+- Make sure to have a path for the database `DATABASE_URL="file:./db.sqlite"` 
 
 Run the service "Default at port 3000"
 `npm run dev`
